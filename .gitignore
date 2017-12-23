@@ -1,0 +1,10 @@
+.vs/
+bin/
+cake/
+obj/
+packages/
+artifacts/
+
+*.cache
+*.user
+*.log
