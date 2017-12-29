@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <Product>NRun Framework</Product>
+    <PackageId>NRun.Core</PackageId>
+    <Description>A framework for working with work.</Description>
+    <Authors>Mitch Rosenburg</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ncrontab" Version="3.3.0" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.0.0-preview00001" />
+  </ItemGroup>
+
+</Project>
