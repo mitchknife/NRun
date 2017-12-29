@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{7B1EF928-A1D6-4BAE-A4CD-1D48A18101FF}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		build.cake = build.cake
+		build.ps1 = build.ps1
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {01FD95EB-39D4-4E7D-B3C2-1756D0C54AE0}
+	EndGlobalSection
+EndGlobal
