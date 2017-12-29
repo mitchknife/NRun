@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <Product>NRun Framework</Product>
+    <PackageId>NRun.WindowsService</PackageId>
+    <Description>Extensions for running IWork as a Windows Service.</Description>
+    <Authors>Mitch Rosenburg</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NRun.Core\NRun.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceProcess" />
+  </ItemGroup>
+
+</Project>
