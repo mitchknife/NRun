@@ -12,8 +12,23 @@ namespace NRun.Core
 		/// </summary>
 		/// <param name="job">The job to schedule.</param>
 		/// <param name="crontab">The crontab schedule expression.</param>
+		public static IJob WithSchedule(this IJob job, string crontab)
+		{
+			if (job == null)
+				throw new ArgumentNullException(nameof(job));
+			if (crontab == null)
+				throw new ArgumentNullException(nameof(crontab));
+
+			return job.WithSchedule(crontab, null);
+		}
+
+		/// <summary>
+		/// Creates a new job that executes on the supplied crontab schedule.
+		/// </summary>
+		/// <param name="job">The job to schedule.</param>
+		/// <param name="crontab">The crontab schedule expression.</param>
 		/// <param name="scheduler">The scheduler.</param>
-		public static IJob WithSchedule(this IJob job, string crontab, IScheduler scheduler = null)
+		public static IJob WithSchedule(this IJob job, string crontab, IScheduler scheduler)
 		{
 			if (job == null)
 				throw new ArgumentNullException(nameof(job));
@@ -22,7 +37,7 @@ namespace NRun.Core
 
 			var parseOptions = new CrontabSchedule.ParseOptions { IncludingSeconds = crontab.Split(' ').Length == 6 };
 			var schedule = CrontabSchedule.Parse(crontab, parseOptions);
-			return job.WithSchedule(schedule.GetNextOccurrence, scheduler ?? Scheduler.Default);
+			return job.WithSchedule(schedule.GetNextOccurrence, scheduler);
 		}
 
 		/// <summary>
@@ -31,16 +46,14 @@ namespace NRun.Core
 		/// <param name="job">The job to schedule.</param>
 		/// <param name="getNextOccurrence">The method that gets the next time to execute the job.</param>
 		/// <param name="scheduler">The scheduler.</param>
-		/// <returns></returns>
 		public static IJob WithSchedule(this IJob job, Func<DateTime, DateTime> getNextOccurrence, IScheduler scheduler)
 		{
 			if (job == null)
 				throw new ArgumentNullException(nameof(job));
 			if (getNextOccurrence == null)
 				throw new ArgumentNullException(nameof(getNextOccurrence));
-			if (scheduler == null)
-				throw new ArgumentNullException(nameof(scheduler));
 
+			scheduler = scheduler ?? Scheduler.Default;
 			var jobStream = Observable.Generate(
 				initialState: 0,
 				condition: _ => true,
