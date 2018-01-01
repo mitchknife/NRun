@@ -139,28 +139,17 @@ namespace NRun.Core.UnitTests
 		[Fact]
 		public void Observable_OnException_Rethrows()
 		{
-			using (var semaphore = new SemaphoreSlim(0))
-			{
-				var scheduler = new TestScheduler();
-				var job = Job.Create(Observable.Interval(TimeSpan.FromTicks(1), scheduler)
-					.Select(x => Job.Create(async ct =>
-					{
-						await Task.Yield();
-						try
-						{
-							throw new TestException();
-						}
-						finally
-						{
-							semaphore.Release();
-						}
-					})));
+			var scheduler = new TestScheduler();
+			var job = Job.Create(Observable.Interval(TimeSpan.FromTicks(1), scheduler)
+				.Select(x => Job.Create(async ct =>
+				{
+					await Task.Yield();
+					throw new TestException();
+				})));
 
-				var task = job.ExecuteAsync(CancellationToken.None);
-				scheduler.AdvanceBy(1);
-				semaphore.ShouldWait(1);
-				Awaiting(() => task).Should().Throw<TestException>();
-			}
+			var task = job.ExecuteAsync(CancellationToken.None);
+			scheduler.AdvanceBy(1);
+			Awaiting(() => task).Should().Throw<TestException>();
 		}
 	}
 }
