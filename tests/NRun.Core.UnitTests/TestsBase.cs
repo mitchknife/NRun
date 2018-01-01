@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using System.Threading;
-using System.Linq;
 
 namespace NRun.Core.UnitTests
 {
@@ -21,21 +20,13 @@ namespace NRun.Core.UnitTests
 
 	internal static class TestExtensions
 	{
-		public static void ShouldWait(this SemaphoreSlim semaphore)
-		{
-			semaphore.ShouldWait(1);
-		}
-
 		public static void ShouldWait(this SemaphoreSlim semaphore, int count)
 		{
-			foreach (var _ in Enumerable.Range(0, count))
-				semaphore.Wait(1000).Should().BeTrue();
-			semaphore.ShouldNotWait();
-		}
+			int actualCount = 0;
+			while (semaphore.Wait(100))
+				actualCount++;
 
-		public static void ShouldNotWait(this SemaphoreSlim semaphore)
-		{
-			semaphore.Wait(0).Should().BeFalse();
+			actualCount.Should().Be(count, "semaphore.Release() should have been called {0} times", count);
 		}
 	}
 

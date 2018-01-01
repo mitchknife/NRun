@@ -58,9 +58,9 @@ namespace NRun.Core.UnitTests
 				using (var cancellation = new CancellationTokenSource())
 				{
 					var task = job.ExecuteAsync(cancellation.Token);
-					startSemaphore.Wait(1000).Should().BeTrue();
+					startSemaphore.ShouldWait(1);
 					cancellation.Cancel();
-					stopSemaphore.Wait(1000).Should().BeTrue();
+					stopSemaphore.ShouldWait(1);
 				}
 			}
 		}
@@ -75,32 +75,31 @@ namespace NRun.Core.UnitTests
 		[Fact]
 		public async Task Observable_Success()
 		{
-			using (var semaphore = new SemaphoreSlim(1))
+			using (var semaphore = new SemaphoreSlim(0))
 			{
 				var scheduler = new TestScheduler();
 				const int total = 3;
-				int count = 0;
 
-				var job = Job.Create(Observable.Interval(TimeSpan.FromTicks(1), scheduler)
-					.TakeWhile(_ => count < total)
+				var job = Job.Create(Observable.Interval(TimeSpan.FromTicks(2), scheduler)
+					.Take(total)
 					.Select(x => Job.Create(async ct =>
 					{
 						await Task.Yield();
-						count++;
 						semaphore.Release();
 					})));
 
 				var task = job.ExecuteAsync(CancellationToken.None);
 
-				foreach (int value in Enumerable.Range(0, total + 1))
+				foreach (int _ in Enumerable.Range(0, total))
 				{
-					semaphore.ShouldWait();
-					count.Should().Be(value);
 					scheduler.AdvanceBy(1);
+					semaphore.ShouldWait(0);
+					scheduler.AdvanceBy(1);
+					semaphore.ShouldWait(1);
 				}
 
 				await task;
-				count.Should().Be(total);
+				semaphore.ShouldWait(0);
 			}
 		}
 
@@ -121,10 +120,10 @@ namespace NRun.Core.UnitTests
 				var task = job.ExecuteAsync(cancellation.Token);
 
 				scheduler.AdvanceBy(TimeSpan.FromSeconds(1).Ticks);
-				semaphore.ShouldNotWait();
+				semaphore.ShouldWait(0);
 
 				scheduler.AdvanceBy(TimeSpan.FromSeconds(1).Ticks);
-				semaphore.ShouldNotWait();
+				semaphore.ShouldWait(0);
 
 				scheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
 				semaphore.ShouldWait(1);
@@ -155,12 +154,11 @@ namespace NRun.Core.UnitTests
 						{
 							semaphore.Release();
 						}
-						
 					})));
 
 				var task = job.ExecuteAsync(CancellationToken.None);
 				scheduler.AdvanceBy(1);
-				semaphore.ShouldWait();
+				semaphore.ShouldWait(1);
 				Awaiting(() => task).Should().Throw<TestException>();
 			}
 		}

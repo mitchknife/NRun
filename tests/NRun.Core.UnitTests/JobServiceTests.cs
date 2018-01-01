@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading;
-using FluentAssertions;
 using Xunit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using FluentAssertions;
 
 namespace NRun.Core.UnitTests
 {
@@ -20,10 +22,10 @@ namespace NRun.Core.UnitTests
 				var service = new JobService(job);
 				service.IsRunning.Should().BeFalse();
 				service.Start();
-				startSemaphore.ShouldWait();
+				startSemaphore.ShouldWait(1);
 				service.IsRunning.Should().BeTrue();
 				service.Stop();
-				stopSemaphore.ShouldWait();
+				stopSemaphore.ShouldWait(1);
 				service.IsRunning.Should().BeFalse();
 			}
 		}
@@ -38,7 +40,7 @@ namespace NRun.Core.UnitTests
 					handleServiceFaulted: ex => { semaphore.Release(); return true; });
 
 				service.Start();
-				semaphore.ShouldWait();
+				semaphore.ShouldWait(1);
 				service.Stop();
 			}
 		}
