@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,9 +12,9 @@ namespace NRun.Core
 	/// </summary>
     public class JobService
     {
-		public JobService(IJob job)
+		public JobService(IReadOnlyList<IJob> jobs)
 		{
-			m_job = job ?? throw new ArgumentNullException(nameof(job));
+			m_jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
 		}
 
 		public bool IsRunning => m_cancellation != null;
@@ -25,8 +27,12 @@ namespace NRun.Core
 					throw new InvalidOperationException("Service is already running.");
 
 				m_cancellation = new CancellationTokenSource();
-				m_jobTask = Task.Run(() => m_job.ExecuteAsync(m_cancellation.Token));
-				m_jobTask.ContinueWith(_ => Stop(), TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach);
+				m_jobTasks = m_jobs
+					.Select(job => Task.Run(() => job.ExecuteAsync(m_cancellation.Token)))
+					.ToList();
+
+				foreach (var jobTask in m_jobTasks)
+					jobTask.ContinueWith(_ => Stop(), TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach);
 			}
 		}
 
@@ -41,7 +47,7 @@ namespace NRun.Core
 
 				try
 				{
-					m_jobTask.GetAwaiter().GetResult();
+					Task.WhenAny(Task.Delay(3000), Task.WhenAll(m_jobTasks)).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
 				catch (Exception ex) when (
 					ex is OperationCanceledException ||
@@ -57,7 +63,7 @@ namespace NRun.Core
 				{
 					m_cancellation.Dispose();
 					m_cancellation = null;
-					m_jobTask = null;
+					m_jobTasks = null;
 				}
 			}
 		}
@@ -68,9 +74,9 @@ namespace NRun.Core
 		}
 
 		readonly object m_lock = new object();
-		readonly IJob m_job;
+		readonly IReadOnlyList<IJob> m_jobs;
 
-		Task m_jobTask;
+		IReadOnlyList<Task> m_jobTasks;
 		CancellationTokenSource m_cancellation;
 	}
 }

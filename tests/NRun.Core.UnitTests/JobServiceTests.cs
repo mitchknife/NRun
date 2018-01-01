@@ -19,7 +19,7 @@ namespace NRun.Core.UnitTests
 					startJob: () => startSemaphore.Release(),
 					stopJob: () => stopSemaphore.Release());
 
-				var service = new JobService(job);
+				var service = new JobService(new[] { job });
 				service.IsRunning.Should().BeFalse();
 				service.Start();
 				startSemaphore.ShouldWait(1);
@@ -31,12 +31,36 @@ namespace NRun.Core.UnitTests
 		}
 
 		[Fact]
-		public void OnException_ServiceFaultedIsCalled()
+		public void StartStop_MultipleJobs_Success()
+		{
+			using (var semaphore = new SemaphoreSlim(0))
+			{
+				var job1 = Job.Create(async ct =>
+				{
+					await Task.Yield();
+					semaphore.Release();
+				});
+
+				var job2 = Job.Create(async ct =>
+				{
+					await Task.Yield();
+					semaphore.Release();
+				});
+
+				var service = new JobService(new[] { job1, job2 });
+				service.Start();
+				semaphore.ShouldWait(2);
+				service.Stop();
+			}
+		}
+
+		[Fact]
+		public void ServiceFaulted_Handled_Success()
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
 				var service = new TestJobService(
-					job: Job.Create(ct => { throw new TestException(); }),
+					jobs: new[] { Job.Create(ct => { throw new TestException(); }) },
 					handleServiceFaulted: ex => { semaphore.Release(); return true; });
 
 				service.Start();
@@ -45,10 +69,29 @@ namespace NRun.Core.UnitTests
 			}
 		}
 
+		[Fact]
+		public void ServiceFaulted_MultipleJobs_OtherJobsStop()
+		{
+			using (var semaphore = new SemaphoreSlim(0))
+			{
+				var service = new JobService(new[]
+				{
+					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
+					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
+					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
+					Job.Create(ct => throw new TestException()),
+				});
+
+				service.Start();
+				semaphore.ShouldWait(3);
+				service.Stop();
+			}
+		}
+
 		private class TestJobService : JobService
 		{
-			public TestJobService(IJob job, Func<Exception, bool> handleServiceFaulted)
-				: base(job)
+			public TestJobService(IReadOnlyList<IJob> jobs, Func<Exception, bool> handleServiceFaulted)
+				: base(jobs)
 			{
 				m_handledServiceFaulted = handleServiceFaulted ?? base.HandleServiceFaulted;
 			}

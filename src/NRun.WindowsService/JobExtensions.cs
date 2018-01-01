@@ -51,7 +51,7 @@ namespace NRun.WindowsService
 		private sealed class OurJobService : JobService
 		{
 			public OurJobService(IJob job)
-				: base(job)
+				: base(new[] { job })
 			{
 			}
 
