@@ -7,14 +7,20 @@ using System.Threading.Tasks;
 namespace NRun.Core
 {
 	/// <summary>
-	/// This class wraps a job with start/stop semantics, executing the job on the threadpool.
+	/// This class wraps a collection of jobs with start/stop semantics, executing the jobs concurrently on the threadpool.
 	/// The main purpose of this class is to make more of the Windows Service pipeline testable and should not need to used directly from your code.
 	/// </summary>
-    public class JobService
+	public class JobService
     {
 		public JobService(IReadOnlyList<IJob> jobs)
+			: this(jobs, null)
+		{
+		}
+
+		public JobService(IReadOnlyList<IJob> jobs, JobServiceSettings settings)
 		{
 			m_jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
+			m_stopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
 		}
 
 		public bool IsRunning => m_cancellation != null;
@@ -47,7 +53,7 @@ namespace NRun.Core
 
 				try
 				{
-					Task.WhenAny(Task.Delay(3000), Task.WhenAll(m_jobTasks)).GetAwaiter().GetResult().GetAwaiter().GetResult();
+					Task.WhenAny(Task.Delay(m_stopTimeout), Task.WhenAll(m_jobTasks)).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
 				catch (Exception ex) when (
 					ex is OperationCanceledException ||
@@ -75,6 +81,7 @@ namespace NRun.Core
 
 		readonly object m_lock = new object();
 		readonly IReadOnlyList<IJob> m_jobs;
+		readonly TimeSpan m_stopTimeout;
 
 		IReadOnlyList<Task> m_jobTasks;
 		CancellationTokenSource m_cancellation;
