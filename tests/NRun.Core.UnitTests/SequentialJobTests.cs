@@ -26,12 +26,12 @@ namespace NRun.Core.UnitTests
 				{
 					new Job(async ct =>
 					{
-						await Task.Yield();
+						await Task.Delay(0);
 						semaphore1.Release();
 					}),
 					new Job(async ct =>
 					{
-						await Task.Yield();
+						await Task.Delay(0);
 						semaphore1.ShouldWait(1);
 						semaphore2.Release();
 					}),

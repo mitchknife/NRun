@@ -20,7 +20,7 @@ namespace NRun.Core.UnitTests
 				var scheduler = new TestScheduler();
 				var job = new Job(async ct =>
 				{
-					await Task.Yield();
+					await Task.Delay(0);
 					semaphore.Release();
 				})
 				.ToScheduledJob("*/5 * * * * *", scheduler);

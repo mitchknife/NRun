@@ -35,13 +35,13 @@ namespace NRun.Core.UnitTests
 			{
 				var job1 = new Job(async ct =>
 				{
-					await Task.Yield();
+					await Task.Delay(0);
 					semaphore.Release();
 				});
 
 				var job2 = new Job(async ct =>
 				{
-					await Task.Yield();
+					await Task.Delay(0);
 					semaphore.Release();
 				});
 

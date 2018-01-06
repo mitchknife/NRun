@@ -30,7 +30,7 @@ namespace NRun.Core.UnitTests
 					.Take(total)
 					.Select(x => new Job(async ct =>
 					{
-						await Task.Yield();
+						await Task.Delay(0);
 						semaphore.Release();
 					})));
 
@@ -56,7 +56,7 @@ namespace NRun.Core.UnitTests
 			var job = new StreamingJob(Observable.Interval(TimeSpan.FromTicks(1), scheduler)
 				.Select(x => new Job(async ct =>
 				{
-					await Task.Yield();
+					await Task.Delay(0);
 					throw new TestException();
 				})));
 
