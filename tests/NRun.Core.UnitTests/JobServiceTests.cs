@@ -4,6 +4,7 @@ using Xunit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
+using NRun.Core.Jobs;
 
 namespace NRun.Core.UnitTests
 {
@@ -15,10 +16,7 @@ namespace NRun.Core.UnitTests
 			using (var startSemaphore = new SemaphoreSlim(0))
 			using (var stopSemaphore = new SemaphoreSlim(0))
 			{
-				var job = Job.Create(
-					startJob: () => startSemaphore.Release(),
-					stopJob: () => stopSemaphore.Release());
-
+				var job = CreateStartStopJob(() => startSemaphore.Release(), () => stopSemaphore.Release());
 				var service = new JobService(new[] { job });
 				service.IsRunning.Should().BeFalse();
 				service.Start();
@@ -35,13 +33,13 @@ namespace NRun.Core.UnitTests
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var job1 = Job.Create(async ct =>
+				var job1 = new Job(async ct =>
 				{
 					await Task.Yield();
 					semaphore.Release();
 				});
 
-				var job2 = Job.Create(async ct =>
+				var job2 = new Job(async ct =>
 				{
 					await Task.Yield();
 					semaphore.Release();
@@ -60,7 +58,7 @@ namespace NRun.Core.UnitTests
 			using (var semaphore = new SemaphoreSlim(0))
 			{
 				var service = new TestJobService(
-					jobs: new[] { Job.Create(ct => { throw new TestException(); }) },
+					jobs: new[] { new Job(ct => { throw new TestException(); }) },
 					handleServiceFaulted: ex => { semaphore.Release(); return true; });
 
 				service.Start();
@@ -76,16 +74,28 @@ namespace NRun.Core.UnitTests
 			{
 				var service = new JobService(new[]
 				{
-					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
-					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
-					Job.Create(startJob: () => { }, stopJob: () => semaphore.Release()),
-					Job.Create(ct => throw new TestException()),
+					CreateStartStopJob(() => { }, () => semaphore.Release()),
+					CreateStartStopJob(() => { }, () => semaphore.Release()),
+					CreateStartStopJob(() => { }, () => semaphore.Release()),
+					CreateStartStopJob(() => throw new TestException(), () => { }),
 				});
 
 				service.Start();
 				semaphore.ShouldWait(3);
 				service.Stop();
 			}
+		}
+
+		private Job CreateStartStopJob(Action start, Action stop)
+		{
+			return new Job(async ct =>
+		   {
+			   start();
+			   var taskCompletion = new TaskCompletionSource<bool>();
+			   using (ct.Register(() => taskCompletion.SetResult(true)))
+				   await taskCompletion.Task.ConfigureAwait(false);
+			   stop();
+		   });
 		}
 
 		private class TestJobService : JobService
