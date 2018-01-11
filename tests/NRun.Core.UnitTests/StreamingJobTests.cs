@@ -28,11 +28,8 @@ namespace NRun.Core.UnitTests
 
 				var job = new StreamingJob(Observable.Interval(TimeSpan.FromTicks(2), scheduler)
 					.Take(total)
-					.Select(x => new Job(async ct =>
-					{
-						await Task.Delay(0);
-						semaphore.Release();
-					})));
+					.Select(x => CreateTestJob(ct => semaphore.Release()))
+				);
 
 				var task = job.ExecuteAsync(CancellationToken.None);
 
@@ -54,11 +51,8 @@ namespace NRun.Core.UnitTests
 		{
 			var scheduler = new TestScheduler();
 			var job = new StreamingJob(Observable.Interval(TimeSpan.FromTicks(1), scheduler)
-				.Select(x => new Job(async ct =>
-				{
-					await Task.Delay(0);
-					throw new TestException();
-				})));
+				.Select(x => CreateTestJob(ct => throw new TestException()))
+			);
 
 			var task = job.ExecuteAsync(CancellationToken.None);
 			scheduler.AdvanceBy(1);

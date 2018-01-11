@@ -1,5 +1,4 @@
 ﻿using NCrontab;
-using NRun.Core.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Concurrency;
@@ -8,6 +7,15 @@ namespace NRun.Core.Jobs
 {
 	public static class JobExtensions
 	{
+		/// <summary>
+		/// Converts a sequence of jobs into a parallel job.
+		/// </summary>
+		/// <param name="jobs">The jobs to execute in parallel.</param>
+		/// <returns></returns>
+		public static ParallelJob ToParallelJob(this IEnumerable<IJob> jobs)
+		{
+			return new ParallelJob(jobs);
+		}
 		/// <summary>
 		/// Converts a sequence of jobs to a sequential job.
 		/// </summary>

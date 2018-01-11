@@ -12,14 +12,14 @@ namespace NRun.Core
 	/// </summary>
 	public class JobService
     {
-		public JobService(IReadOnlyList<IJob> jobs)
-			: this(jobs, null)
+		public JobService(IJob job)
+			: this(job, null)
 		{
 		}
 
-		public JobService(IReadOnlyList<IJob> jobs, JobServiceSettings settings)
+		public JobService(IJob job, JobServiceSettings settings)
 		{
-			m_jobs = jobs ?? throw new ArgumentNullException(nameof(jobs));
+			m_job = job ?? throw new ArgumentNullException(nameof(job));
 			m_stopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
 		}
 
@@ -33,12 +33,8 @@ namespace NRun.Core
 					throw new InvalidOperationException("Service is already running.");
 
 				m_cancellation = new CancellationTokenSource();
-				m_jobTasks = m_jobs
-					.Select(job => Task.Run(() => job.ExecuteAsync(m_cancellation.Token)))
-					.ToList();
-
-				foreach (var jobTask in m_jobTasks)
-					jobTask.ContinueWith(_ => Stop(), TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach);
+				m_jobTask = Task.Run(() => m_job.ExecuteAsync(m_cancellation.Token));
+				m_jobTask.ContinueWith(_ => Stop(), TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach);
 			}
 		}
 
@@ -53,7 +49,7 @@ namespace NRun.Core
 
 				try
 				{
-					Task.WhenAny(Task.Delay(m_stopTimeout), Task.WhenAll(m_jobTasks)).GetAwaiter().GetResult().GetAwaiter().GetResult();
+					Task.WhenAny(Task.Delay(m_stopTimeout), m_jobTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
 				catch (Exception ex) when (
 					ex is OperationCanceledException ||
@@ -69,7 +65,7 @@ namespace NRun.Core
 				{
 					m_cancellation.Dispose();
 					m_cancellation = null;
-					m_jobTasks = null;
+					m_jobTask = null;
 				}
 			}
 		}
@@ -80,10 +76,10 @@ namespace NRun.Core
 		}
 
 		readonly object m_lock = new object();
-		readonly IReadOnlyList<IJob> m_jobs;
+		readonly IJob m_job;
 		readonly TimeSpan m_stopTimeout;
 
-		IReadOnlyList<Task> m_jobTasks;
+		Task m_jobTask;
 		CancellationTokenSource m_cancellation;
 	}
 }

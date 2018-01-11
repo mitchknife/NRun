@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NRun.Core.Jobs;
@@ -18,12 +16,8 @@ namespace NRun.Core.UnitTests
 			using (var cancellation = new CancellationTokenSource())
 			{
 				var scheduler = new TestScheduler();
-				var job = new Job(async ct =>
-				{
-					await Task.Delay(0);
-					semaphore.Release();
-				})
-				.ToScheduledJob("*/5 * * * * *", scheduler);
+				var job = CreateTestJob(ct => semaphore.Release())
+					.ToScheduledJob("*/5 * * * * *", scheduler);
 
 				var task = job.ExecuteAsync(cancellation.Token);
 

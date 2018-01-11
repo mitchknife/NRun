@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -24,14 +23,12 @@ namespace NRun.Core.UnitTests
 			{
 				var job = new SequentialJob(new[]
 				{
-					new Job(async ct =>
+					CreateTestJob(ct =>
 					{
-						await Task.Delay(0);
 						semaphore1.Release();
 					}),
-					new Job(async ct =>
+					CreateTestJob(ct =>
 					{
-						await Task.Delay(0);
 						semaphore1.ShouldWait(1);
 						semaphore2.Release();
 					}),
