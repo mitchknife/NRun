@@ -1,7 +1,5 @@
-﻿using NCrontab;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Concurrency;
 
 namespace NRun.Core.Jobs
 {
@@ -35,39 +33,13 @@ namespace NRun.Core.Jobs
 		}
 
 		/// <summary>
-		/// Converts a job to a scheduled job using a crontab expression.
-		/// </summary>
-		/// <param name="job">The job to schedule.</param>
-		/// <param name="crontab">The crontab expression.</param>
-		public static ScheduledJob ToScheduledJob(this IJob job, string crontab)
-		{
-			return job.ToScheduledJob(crontab, null);
-		}
-
-		/// <summary>
-		/// Converts a job to a scheduled job using a crontab expression and scheduler.
-		/// </summary>
-		/// <param name="job">The job to schedule.</param>
-		/// <param name="crontab">The crontab expression.</param>
-		/// <param name="scheduler">The scheduler.</param>
-		public static ScheduledJob ToScheduledJob(this IJob job, string crontab, IScheduler scheduler)
-		{
-			if (crontab == null)
-				throw new ArgumentNullException(nameof(crontab));
-
-			var parseOptions = new CrontabSchedule.ParseOptions { IncludingSeconds = crontab.Split(' ').Length == 6 };
-			var schedule = CrontabSchedule.Parse(crontab, parseOptions);
-			return job.ToScheduledJob(new ScheduledJobSettings { GetNextOccurrence = schedule.GetNextOccurrence, Scheduler = scheduler });
-		}
-
-		/// <summary>
 		/// Converts a job to a scheduled job.
 		/// </summary>
 		/// <param name="job">The job to schedule.</param>
-		/// <param name="settings">The scheduled job settings.</param>
-		public static ScheduledJob ToScheduledJob(this IJob job, ScheduledJobSettings settings)
+		/// <param name="schedule">The schedule.</param>
+		public static ScheduledJob ToScheduledJob(this IJob job, Schedule schedule)
 		{
-			return new ScheduledJob(job, settings);
+			return new ScheduledJob(job, schedule);
 		}
 	}
 }

@@ -16,10 +16,11 @@ namespace NRun.Core.UnitTests
 			using (var cancellation = new CancellationTokenSource())
 			{
 				var scheduler = new TestScheduler();
-				var job = CreateTestJob(ct => semaphore.Release())
-					.ToScheduledJob("*/5 * * * * *", scheduler);
+				var schedule = Schedule.CreateFromCrontab("*/5 * * * * *", scheduler);
 
-				var task = job.ExecuteAsync(cancellation.Token);
+				var task = CreateTestJob(ct => semaphore.Release())
+					.ToScheduledJob(schedule)
+					.ExecuteAsync(cancellation.Token);
 
 				scheduler.AdvanceBy(TimeSpan.FromSeconds(1).Ticks);
 				semaphore.ShouldWait(0);
