@@ -16,7 +16,7 @@ namespace NRun.Core.UnitTests
 			using (var cancellation = new CancellationTokenSource())
 			{
 				var scheduler = new TestScheduler();
-				var schedule = Schedule.CreateFromCrontab("*/5 * * * * *", scheduler);
+				var schedule = Schedule.CreateFromCrontab("*/5 * * * * *", new ScheduleSettings { Scheduler = scheduler });
 
 				var task = CreateTestJob(ct => semaphore.Release())
 					.ToScheduledJob(schedule)
