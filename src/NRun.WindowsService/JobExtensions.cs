@@ -24,15 +24,22 @@ namespace NRun.WindowsService
 			if (string.IsNullOrEmpty(settings.ServiceName))
 				throw new ArgumentException("ServiceName is required.", nameof(settings));
 
-			var service = new OurWindowsService(job) { ServiceName = settings.ServiceName };
+			var jobService = new JobService(job, new JobServiceSettings { StopTimeout = settings.StopTimeout });
+			jobService.UnhandledException += (sender, exception) =>
+			{
+				// TODO: log this exception as well?
+				Environment.Exit(1);
+			};
+
+			var service = new OurServiceBase(jobService) { ServiceName = settings.ServiceName };
 			ServiceBase.Run(service);
 		}
 
-		private sealed class OurWindowsService : ServiceBase
+		private sealed class OurServiceBase : ServiceBase
 		{
-			public OurWindowsService(IJob job)
+			public OurServiceBase(JobService jobService)
 			{
-				m_jobService = new OurJobService(job);
+				m_jobService = jobService;
 			}
 
 			protected override void OnStart(string[] args)
@@ -46,20 +53,6 @@ namespace NRun.WindowsService
 			}
 
 			readonly JobService m_jobService;
-		}
-
-		private sealed class OurJobService : JobService
-		{
-			public OurJobService(IJob job)
-				: base(job)
-			{
-			}
-
-			protected override bool HandleServiceFaulted(Exception exception)
-			{
-				Environment.Exit(-1);
-				return true;
-			}
 		}
 	}
 }

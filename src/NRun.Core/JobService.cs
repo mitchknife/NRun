@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,18 +8,17 @@ namespace NRun.Core
 	/// This class wraps a collection of jobs with start/stop semantics, executing the jobs concurrently on the threadpool.
 	/// The main purpose of this class is to make more of the Windows Service pipeline testable and should not need to used directly from your code.
 	/// </summary>
-	public class JobService
-    {
-		public JobService(IJob job)
-			: this(job, null)
-		{
-		}
-
+	public sealed class JobService
+	{
 		public JobService(IJob job, JobServiceSettings settings)
 		{
 			m_job = job ?? throw new ArgumentNullException(nameof(job));
-			m_stopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
+			StopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
 		}
+
+		public TimeSpan StopTimeout { get; }
+
+		public event EventHandler<Exception> UnhandledException;
 
 		public bool IsRunning => m_cancellation != null;
 
@@ -49,7 +46,7 @@ namespace NRun.Core
 
 				try
 				{
-					Task.WhenAny(Task.Delay(m_stopTimeout), m_jobTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
+					Task.WhenAny(Task.Delay(StopTimeout), m_jobTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
 				catch (Exception ex) when (
 					ex is OperationCanceledException ||
@@ -58,8 +55,8 @@ namespace NRun.Core
 				}
 				catch (Exception ex)
 				{
-					if (!HandleServiceFaulted(ex))
-						throw;
+					UnhandledException?.Invoke(this, ex);
+					throw;
 				}
 				finally
 				{
@@ -70,14 +67,8 @@ namespace NRun.Core
 			}
 		}
 
-		protected virtual bool HandleServiceFaulted(Exception exception)
-		{
-			return false;
-		}
-
 		readonly object m_lock = new object();
 		readonly IJob m_job;
-		readonly TimeSpan m_stopTimeout;
 
 		Task m_jobTask;
 		CancellationTokenSource m_cancellation;

@@ -15,7 +15,7 @@ namespace NRun.Core.UnitTests
 			using (var stopSemaphore = new SemaphoreSlim(0))
 			{
 				var job = CreateTestJob(() => startSemaphore.Release(), () => stopSemaphore.Release());
-				var service = new JobService(job);
+				var service = new JobService(job, null);
 				service.IsRunning.Should().BeFalse();
 				service.Start();
 				startSemaphore.ShouldWait(1);
@@ -27,13 +27,12 @@ namespace NRun.Core.UnitTests
 		}
 
 		[Fact]
-		public void ServiceFaulted_Handled_Success()
+		public void UnhandledException_IsInvoked()
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var service = new TestJobService(
-					job: new Job(ct => { throw new TestException(); }),
-					handleServiceFaulted: ex => { semaphore.Release(); return true; });
+				var service = new JobService(new Job(ct => { throw new TestException(); }), null);
+				service.UnhandledException += (_, ex) => semaphore.Release();
 
 				service.Start();
 				semaphore.ShouldWait(1);
@@ -41,20 +40,52 @@ namespace NRun.Core.UnitTests
 			}
 		}
 
-		private class TestJobService : JobService
+		[Fact]
+		public void StopTimeout_FastJob_ShouldFinish()
 		{
-			public TestJobService(IJob job, Func<Exception, bool> handleServiceFaulted)
-				: base(job)
+			using (var semaphore = new SemaphoreSlim(0))
 			{
-				m_handledServiceFaulted = handleServiceFaulted ?? base.HandleServiceFaulted;
-			}
+				var job = CreateTestJob(
+					start: () => { },
+					stop: () =>
+					{
+						Thread.Sleep(100);
+						semaphore.Release();
+					});
 
-			protected override bool HandleServiceFaulted(Exception exception)
+				var service = new JobService(job, new JobServiceSettings
+				{
+					StopTimeout = TimeSpan.FromMilliseconds(1000),
+				});
+
+				service.Start();
+				service.Stop();
+				semaphore.ShouldWait(1);
+			}
+		}
+
+		[Fact]
+		public void StopTimeout_SlowJob_ShouldNotFinish()
+		{
+			using (var semaphore = new SemaphoreSlim(0))
 			{
-				return m_handledServiceFaulted(exception);
-			}
+				var job = CreateTestJob(
+					start: () => { },
+					stop: () =>
+					{
+						Thread.Sleep(1000);
+						semaphore.Release();
+					});
 
-			Func<Exception, bool> m_handledServiceFaulted;
+				var service = new JobService(job, new JobServiceSettings
+				{
+					StopTimeout = TimeSpan.FromMilliseconds(100),
+				});
+
+				service.Start();
+				service.Stop();
+				semaphore.ShouldWait(0);
+			}
 		}
 	}
 }
