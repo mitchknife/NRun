@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using System.Threading;
-using NRun.Core.Jobs;
 
 namespace NRun.Core.UnitTests
 {

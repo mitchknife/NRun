@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NRun.Core.Jobs
+namespace NRun.Core
 {
 	/// <summary>
 	/// A simple job that wraps a function.
@@ -12,16 +12,16 @@ namespace NRun.Core.Jobs
 		/// <summary>
 		/// Gets a new job that executes the supplied fuction.
 		/// </summary>
-		public Job(Func<CancellationToken, Task> function)
+		public Job(Func<CancellationToken, Task> executeAsync)
 		{
-			m_function = function ?? throw new ArgumentNullException(nameof(function));
+			m_executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
 		}
 
 		public async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
-			await m_function(cancellationToken).ConfigureAwait(false);
+			await m_executeAsync(cancellationToken).ConfigureAwait(false);
 		}
 
-		readonly Func<CancellationToken, Task> m_function;
+		readonly Func<CancellationToken, Task> m_executeAsync;
 	}
 }

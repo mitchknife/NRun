@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using NRun.Core.Jobs;
 using System;
 using System.Threading;
 using Xunit;

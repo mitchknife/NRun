@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 
-namespace NRun.Core.Jobs
+namespace NRun.Core
 {
 	/// <summary>
 	/// The schedule settings.
