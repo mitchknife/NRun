@@ -5,13 +5,13 @@ using Xunit;
 
 namespace NRun.Core.UnitTests
 {
-	public class ScheduleTests : TestsBase
+	public class JobScheduleTests : TestsBase
 	{
 		[Fact]
 		public void Clone_Success()
 		{
 			var scheduler = new TestScheduler();
-			var schedule = Schedule.Create(d => d, new ScheduleSettings { Scheduler = scheduler, EndTime = DateTime.UtcNow });
+			var schedule = JobSchedule.Create(d => d, new JobScheduleSettings { Scheduler = scheduler, EndTime = DateTime.UtcNow });
 
 			var clonedSchedule = schedule.Clone();
 			clonedSchedule.Should().NotBeNull();
@@ -29,7 +29,7 @@ namespace NRun.Core.UnitTests
 		{
 			long ticksToAdvance = TimeSpan.FromSeconds(secondsToAdvance).Ticks;
 			var scheduler = new TestScheduler();
-			var schedule = Schedule.CreateFromCrontab(crontab, new ScheduleSettings { Scheduler = scheduler });
+			var schedule = JobSchedule.CreateFromCrontab(crontab, new JobScheduleSettings { Scheduler = scheduler });
 			for (int i = 0; i < iterationsUntilFirstScheduledTime; i++)
 			{
 				scheduler.AdvanceTo(ticksToAdvance * i);
@@ -41,14 +41,14 @@ namespace NRun.Core.UnitTests
 		public void EndTime_Success()
 		{
 			var scheduler = new TestScheduler();
-			var settings = new ScheduleSettings
+			var settings = new JobScheduleSettings
 			{
 				Scheduler = scheduler,
 				EndTime = scheduler.Now.UtcDateTime.AddMinutes(10)
 			};
 
 			var startTime = scheduler.Now.UtcDateTime;
-			var schedule = Schedule.CreateFromCrontab("* * * * *", settings);
+			var schedule = JobSchedule.CreateFromCrontab("* * * * *", settings);
 			scheduler.AdvanceBy(TimeSpan.FromMinutes(12).Ticks);
 			schedule.GetNextScheduledTime().Should().Be(startTime.AddMinutes(10));
 		}

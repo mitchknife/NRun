@@ -6,7 +6,7 @@ namespace NRun.Core
 	/// <summary>
 	/// The schedule settings.
 	/// </summary>
-	public sealed class ScheduleSettings
+	public sealed class JobScheduleSettings
 	{
 		/// <summary>
 		/// The scheduler for the schedule.

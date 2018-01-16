@@ -29,7 +29,7 @@ namespace NRun.Core
 		/// </summary>
 		/// <param name="job">The job to schedule.</param>
 		/// <param name="schedule">The schedule.</param>
-		public static IJob ToScheduledJob(this IJob job, Schedule schedule)
+		public static IJob ToScheduledJob(this IJob job, JobSchedule schedule)
 		{
 			if (job == null)
 				throw new ArgumentNullException(nameof(job));

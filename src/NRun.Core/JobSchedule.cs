@@ -7,13 +7,13 @@ namespace NRun.Core
 	/// <summary>
 	/// Represents a schedule.
 	/// </summary>
-	public sealed class Schedule
+	public sealed class JobSchedule
 	{
 		/// <summary>
 		/// Creates a schedule from the supplied crontab expression.
 		/// </summary>
 		/// <param name="crontab">The crontab expression.</param>
-		public static Schedule CreateFromCrontab(string crontab)
+		public static JobSchedule CreateFromCrontab(string crontab)
 		{
 			return CreateFromCrontab(crontab, null);
 		}
@@ -23,7 +23,7 @@ namespace NRun.Core
 		/// </summary>
 		/// <param name="crontab">The crontab expression.</param>
 		/// <param name="settings">The schedule settings.</param>
-		public static Schedule CreateFromCrontab(string crontab, ScheduleSettings settings)
+		public static JobSchedule CreateFromCrontab(string crontab, JobScheduleSettings settings)
 		{
 			var parseOptions = new CrontabSchedule.ParseOptions { IncludingSeconds = crontab.Split(' ').Length == 6 };
 			var crontabSchedule = CrontabSchedule.Parse(crontab, parseOptions);
@@ -34,7 +34,7 @@ namespace NRun.Core
 		/// Creates a schedule.
 		/// </summary>
 		/// <param name="getNextScheduledTime">A method that gets the next scheduled time after the supplied time.</param>
-		public static Schedule Create(Func<DateTime, DateTime> getNextScheduledTime)
+		public static JobSchedule Create(Func<DateTime, DateTime> getNextScheduledTime)
 		{
 			return Create(getNextScheduledTime, null);
 		}
@@ -44,9 +44,9 @@ namespace NRun.Core
 		/// </summary>
 		/// <param name="getNextScheduledTime">A method that gets the next scheduled time after the supplied time.</param>
 		/// <param name="settings">The schedule settings.</param>
-		public static Schedule Create(Func<DateTime, DateTime> getNextScheduledTime, ScheduleSettings settings)
+		public static JobSchedule Create(Func<DateTime, DateTime> getNextScheduledTime, JobScheduleSettings settings)
 		{
-			return new Schedule(getNextScheduledTime, settings);
+			return new JobSchedule(getNextScheduledTime, settings);
 		}
 
 		/// <summary>
@@ -68,12 +68,12 @@ namespace NRun.Core
 			return nextTime < EndTime ? nextTime : EndTime;
 		}
 
-		public Schedule Clone()
+		public JobSchedule Clone()
 		{
-			return new Schedule(m_getNextScheduledTime, new ScheduleSettings { EndTime = EndTime, Scheduler = Scheduler });
+			return new JobSchedule(m_getNextScheduledTime, new JobScheduleSettings { EndTime = EndTime, Scheduler = Scheduler });
 		}
 
-		private Schedule(Func<DateTime, DateTime> getNextScheduledTime, ScheduleSettings settings)
+		private JobSchedule(Func<DateTime, DateTime> getNextScheduledTime, JobScheduleSettings settings)
 		{
 			m_getNextScheduledTime = getNextScheduledTime ?? throw new ArgumentNullException(nameof(getNextScheduledTime));
 			Scheduler = settings?.Scheduler ?? System.Reactive.Concurrency.Scheduler.Default;
