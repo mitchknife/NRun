@@ -48,7 +48,11 @@ Task("Test")
 	{
 		foreach(var project in GetFiles("./tests/**/*.UnitTests.csproj"))
 		{
-			DotNetCoreTest(project.ToString());
+			DotNetCoreTest(project.ToString(), new DotNetCoreTestSettings
+			{
+				Configuration = configuration,
+				NoBuild = true,
+			});
 		}
 	});
 
