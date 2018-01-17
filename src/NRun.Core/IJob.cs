@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace NRun.Core
 {
 	/// <summary>
-	/// Encapsulates a unit of work.
+	/// Encapulates work that needs to get done.
 	/// </summary>
 	public interface IJob
 	{

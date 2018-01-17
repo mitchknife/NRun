@@ -5,12 +5,12 @@ using System.Reactive.Concurrency;
 namespace NRun.Core
 {
 	/// <summary>
-	/// Represents a schedule.
+	/// A class used to schedule job execution.
 	/// </summary>
 	public sealed class JobSchedule
 	{
 		/// <summary>
-		/// Creates a schedule from the supplied crontab expression.
+		/// Creates a job schedule from a crontab expression.
 		/// </summary>
 		/// <param name="crontab">The crontab expression.</param>
 		public static JobSchedule CreateFromCrontab(string crontab)
@@ -19,7 +19,7 @@ namespace NRun.Core
 		}
 
 		/// <summary>
-		/// Creates a schedule from a crontab expression.
+		/// Creates a job schedule from a crontab expression.
 		/// </summary>
 		/// <param name="crontab">The crontab expression.</param>
 		/// <param name="settings">The schedule settings.</param>
@@ -31,18 +31,18 @@ namespace NRun.Core
 		}
 
 		/// <summary>
-		/// Creates a schedule.
+		/// Creates a job schedule from a generator fuction.
 		/// </summary>
-		/// <param name="getNextScheduledTime">A method that gets the next scheduled time after the supplied time.</param>
+		/// <param name="getNextScheduledTime">The generator function that gets the next scheduled time after the supplied time.</param>
 		public static JobSchedule Create(Func<DateTime, DateTime> getNextScheduledTime)
 		{
 			return Create(getNextScheduledTime, null);
 		}
 
 		/// <summary>
-		/// Creates a schedule.
+		/// Creates a job schedule from a generator fuction.
 		/// </summary>
-		/// <param name="getNextScheduledTime">A method that gets the next scheduled time after the supplied time.</param>
+		/// <param name="getNextScheduledTime">The generator function that gets the next scheduled time after the supplied time.</param>
 		/// <param name="settings">The schedule settings.</param>
 		public static JobSchedule Create(Func<DateTime, DateTime> getNextScheduledTime, JobScheduleSettings settings)
 		{
@@ -50,12 +50,12 @@ namespace NRun.Core
 		}
 
 		/// <summary>
-		/// Gets the scheduler for the schedule.
+		/// Gets the scheduler for the job schedule.
 		/// </summary>
 		public IScheduler Scheduler { get; }
 
 		/// <summary>
-		/// Gets the upper bound time for the schedule.
+		/// Gets the upper bound time for the job schedule.
 		/// </summary>
 		public DateTime EndTime { get; }
 
