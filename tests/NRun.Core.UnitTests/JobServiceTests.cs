@@ -13,7 +13,8 @@ namespace NRun.Core.UnitTests
 			using (var startSemaphore = new SemaphoreSlim(0))
 			using (var stopSemaphore = new SemaphoreSlim(0))
 			{
-				var job = CreateTestJob(() => startSemaphore.Release(), () => stopSemaphore.Release());
+				var executeAsync = CreateExecuteAsync(() => startSemaphore.Release(), () => stopSemaphore.Release());
+				var job = Job.Create(executeAsync);
 				var service = new JobService(job, null);
 				service.IsRunning.Should().BeFalse();
 				service.Start();
@@ -30,7 +31,7 @@ namespace NRun.Core.UnitTests
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var service = new JobService(new Job(ct => { throw new TestException(); }), null);
+				var service = new JobService(Job.Create(ct => { throw new TestException(); }), null);
 				service.UnhandledException += (_, ex) => semaphore.Release();
 
 				service.Start();
@@ -44,7 +45,7 @@ namespace NRun.Core.UnitTests
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var job = CreateTestJob(
+				var executeAsync = CreateExecuteAsync(
 					start: () => { },
 					stop: () =>
 					{
@@ -52,6 +53,7 @@ namespace NRun.Core.UnitTests
 						semaphore.Release();
 					});
 
+				var job = Job.Create(executeAsync);
 				var service = new JobService(job, new JobServiceSettings
 				{
 					StopTimeout = TimeSpan.FromMilliseconds(1000),
@@ -68,7 +70,7 @@ namespace NRun.Core.UnitTests
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var job = CreateTestJob(
+				var executeAsync = CreateExecuteAsync(
 					start: () => { },
 					stop: () =>
 					{
@@ -76,6 +78,7 @@ namespace NRun.Core.UnitTests
 						semaphore.Release();
 					});
 
+				var job = Job.Create(executeAsync);
 				var service = new JobService(job, new JobServiceSettings
 				{
 					StopTimeout = TimeSpan.FromMilliseconds(100),

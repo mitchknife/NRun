@@ -17,18 +17,18 @@ namespace NRun.Core.UnitTests
 			return this.Awaiting(async _ => await funcAsync());
 		}
 
-		protected Job CreateTestJob(Action<CancellationToken> execute)
+		protected Func<CancellationToken, Task> CreateExecuteAsync(Action<CancellationToken> execute)
 		{
-			return new Job(async ct =>
+			return async ct =>
 			{
 				await Task.Delay(1).ConfigureAwait(false);
 				execute(ct);
-			});
+			};
 		}
 
-		protected Job CreateTestJob(Action start, Action stop)
+		protected Func<CancellationToken, Task> CreateExecuteAsync(Action start, Action stop)
 		{
-			return new Job(async ct =>
+			return async ct =>
 			{
 				if (!ct.CanBeCanceled)
 					throw new InvalidOperationException("cancellationToken must be able to be cancelled.");
@@ -37,7 +37,7 @@ namespace NRun.Core.UnitTests
 				using (ct.Register(() => taskCompletion.SetResult(true)))
 					await taskCompletion.Task.ConfigureAwait(false);
 				stop();
-			});
+			};
 		}
 	}
 
