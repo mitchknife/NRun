@@ -8,7 +8,7 @@ namespace NRun.Core
 	public sealed class JobServiceSettings
 	{
 		/// <summary>
-		/// The time to wait for job completion when stop is called.
+		/// The time to wait for service completion when stop is called.
 		/// </summary>
 		public TimeSpan? StopTimeout { get; set; }
 	}

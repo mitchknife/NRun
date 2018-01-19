@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NRun.Core.UnitTests
@@ -16,6 +17,7 @@ namespace NRun.Core.UnitTests
 				var executeAsync = CreateExecuteAsync(() => startSemaphore.Release(), () => stopSemaphore.Release());
 				var job = Job.Create(executeAsync);
 				var service = new JobService(job, null);
+
 				service.IsRunning.Should().BeFalse();
 				service.Start();
 				startSemaphore.ShouldWait(1);
@@ -27,16 +29,15 @@ namespace NRun.Core.UnitTests
 		}
 
 		[Fact]
-		public void UnhandledException_IsInvoked()
+		public void UnhandledException_ServiceFaultedIsInvokedAndStopRethrows()
 		{
 			using (var semaphore = new SemaphoreSlim(0))
 			{
-				var service = new JobService(Job.Create(ct => { throw new TestException(); }), null);
-				service.UnhandledException += (_, ex) => semaphore.Release();
-
+				var service = new JobService(Job.Create(ct => throw new TestException()), null);
+				service.ServiceFaulted += (s, e) => semaphore.Release();
 				service.Start();
 				semaphore.ShouldWait(1);
-				service.Stop();
+				Invoking(() => service.Stop()).Should().Throw<TestException>();
 			}
 		}
 
@@ -74,7 +75,7 @@ namespace NRun.Core.UnitTests
 					start: () => { },
 					stop: () =>
 					{
-						Thread.Sleep(1000);
+						Thread.Sleep(2000);
 						semaphore.Release();
 					});
 

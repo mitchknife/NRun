@@ -6,21 +6,19 @@ namespace NRun.Core
 {
 	/// <summary>
 	/// This class wraps a job with start/stop semantics, executing the job on the thread pool.
-	/// The main purpose of this class is to make more of the Windows Service pipeline testable and should not need to used directly from your code.
+	/// The main purpose of this class is to make more of the Windows Service pipeline testable and should not need to be used directly from your code directly.
 	/// </summary>
 	public sealed class JobService
 	{
 		public JobService(IJob job, JobServiceSettings settings)
 		{
 			m_job = job ?? throw new ArgumentNullException(nameof(job));
-			StopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
+			m_stopTimeout = settings?.StopTimeout ?? TimeSpan.FromSeconds(3);
 		}
 
-		public TimeSpan StopTimeout { get; }
+		public bool IsRunning => m_serviceTask != null;
 
-		public event EventHandler<Exception> UnhandledException;
-
-		public bool IsRunning => m_cancellation != null;
+		public event EventHandler<Exception> ServiceFaulted;
 
 		public void Start()
 		{
@@ -30,8 +28,18 @@ namespace NRun.Core
 					throw new InvalidOperationException("Service is already running.");
 
 				m_cancellation = new CancellationTokenSource();
-				m_jobTask = Task.Run(() => m_job.ExecuteAsync(m_cancellation.Token));
-				m_jobTask.ContinueWith(_ => Stop(), TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach);
+				m_serviceTask = Task.Run(async () =>
+				{
+					try
+					{
+						await m_job.ExecuteAsync(m_cancellation.Token).ConfigureAwait(false);
+					}
+					catch (Exception exception)
+					{
+						ServiceFaulted?.Invoke(this, exception);
+						throw;
+					}
+				});
 			}
 		}
 
@@ -46,31 +54,27 @@ namespace NRun.Core
 
 				try
 				{
-					Task.WhenAny(Task.Delay(StopTimeout), m_jobTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
+					Task.WhenAny(Task.Delay(m_stopTimeout), m_serviceTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
 				catch (Exception ex) when (
 					ex is OperationCanceledException ||
 					(ex is AggregateException agg && agg.InnerException is OperationCanceledException))
 				{
 				}
-				catch (Exception ex)
-				{
-					UnhandledException?.Invoke(this, ex);
-					throw;
-				}
 				finally
 				{
 					m_cancellation.Dispose();
 					m_cancellation = null;
-					m_jobTask = null;
+					m_serviceTask = null;
 				}
 			}
 		}
 
 		readonly object m_lock = new object();
 		readonly IJob m_job;
+		readonly TimeSpan m_stopTimeout;
 
-		Task m_jobTask;
+		Task m_serviceTask;
 		CancellationTokenSource m_cancellation;
 	}
 }
