@@ -1,11 +1,12 @@
 ﻿using NRun.Core;
 using System;
+using System.Diagnostics;
 using System.ServiceProcess;
 
 namespace NRun.WindowsService
 {
 	public static class JobExtensions
-    {
+	{
 		/// <summary>
 		/// Sets up and executes the supplied job as a Windows Service.
 		/// </summary>
@@ -49,7 +50,16 @@ namespace NRun.WindowsService
 
 			private void OnJobServiceFaulted(object sender, Exception exception)
 			{
-				Stop();
+				try
+				{
+					OnStop();
+				}
+				finally
+				{
+					// NOTE: calling Environment.Exit() (instead of Stop()) ensures that the service is shutdown properly to enable automatic restarts.
+					EventLog.WriteEntry($"Job service faulted; forcing process to exit. Exception={exception}", EventLogEntryType.Error);
+					Environment.Exit(-1);
+				}
 			}
 
 			readonly JobService m_jobService;
