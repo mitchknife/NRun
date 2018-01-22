@@ -5,28 +5,26 @@ using System.ServiceProcess;
 
 namespace NRun.WindowsService
 {
-	public static class JobExtensions
+	public static class WindowsService
 	{
 		/// <summary>
-		/// Sets up and executes the supplied job as a Windows Service.
+		/// Runs the supplied job service as a Windows Service.
 		/// </summary>
-		/// <param name="job">The job to execute.</param>
+		/// <param name="jobService">The job service.</param>
 		/// <param name="settings">The Windows Service settings.</param>
 		/// <remarks>
 		/// This method should be used in the entry point of your console application when run as a Windows Service.
 		/// </remarks>
-		public static void ExecuteAsWindowsService(this IJob job, WindowsServiceSettings settings)
+		public static void Run(JobService jobService, WindowsServiceSettings settings)
 		{
-			if (job == null)
-				throw new ArgumentNullException(nameof(job));
+			if (jobService == null)
+				throw new ArgumentNullException(nameof(jobService));
 			if (settings == null)
 				throw new ArgumentNullException(nameof(settings));
 			if (string.IsNullOrEmpty(settings.ServiceName))
 				throw new ArgumentException("ServiceName is required.", nameof(settings));
 
-			var jobService = new JobService(job, new JobServiceSettings { StopTimeout = settings.StopTimeout });
-			var service = new OurServiceBase(jobService) { ServiceName = settings.ServiceName };
-			ServiceBase.Run(service);
+			ServiceBase.Run(new OurServiceBase(jobService) { ServiceName = settings.ServiceName });
 		}
 
 		private sealed class OurServiceBase : ServiceBase
