@@ -1,7 +1,7 @@
-﻿using NRun.Core;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.ServiceProcess;
+using NRun.Core;
 
 namespace NRun.WindowsService
 {

@@ -1,6 +1,6 @@
-﻿using NCrontab;
-using System;
+﻿using System;
 using System.Reactive.Concurrency;
+using NCrontab;
 
 namespace NRun.Core
 {
