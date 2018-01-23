@@ -12,6 +12,11 @@ namespace NRun.Core
 	/// </remarks>
 	public sealed class JobService
 	{
+		public JobService(IJob job)
+			: this(job, null)
+		{
+		}
+
 		public JobService(IJob job, JobServiceSettings settings)
 		{
 			m_job = job ?? throw new ArgumentNullException(nameof(job));
