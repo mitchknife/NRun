@@ -34,6 +34,10 @@ namespace NRun.Core
 					{
 						await m_job.ExecuteAsync(m_cancellation.Token).ConfigureAwait(false);
 					}
+					catch (Exception ex) when (IsCancellationException(ex))
+					{
+						throw;
+					}
 					catch (Exception exception)
 					{
 						ServiceFaulted?.Invoke(this, exception);
@@ -56,9 +60,7 @@ namespace NRun.Core
 				{
 					Task.WhenAny(Task.Delay(m_stopTimeout), m_serviceTask).GetAwaiter().GetResult().GetAwaiter().GetResult();
 				}
-				catch (Exception ex) when (
-					ex is OperationCanceledException ||
-					(ex is AggregateException agg && agg.InnerException is OperationCanceledException))
+				catch (Exception ex) when (IsCancellationException(ex))
 				{
 				}
 				finally
@@ -68,6 +70,12 @@ namespace NRun.Core
 					m_serviceTask = null;
 				}
 			}
+		}
+
+		private static bool IsCancellationException(Exception exception)
+		{
+			return exception is OperationCanceledException ||
+				(exception is AggregateException agg && agg.InnerException is OperationCanceledException);
 		}
 
 		readonly object m_lock = new object();
