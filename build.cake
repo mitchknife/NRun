@@ -36,12 +36,23 @@ Task("Version")
 			.WithProperty("FileVersion", gitVersion.AssemblySemVer);
 	});
 
-Task("Build")
+Task("Restore")
 	.IsDependentOn("Version")
+	.Does(() =>
+	{
+		DotNetCoreRestore(solutionFileName, new DotNetCoreRestoreSettings
+		{
+			MSBuildSettings = msBuildSettings,
+		});
+	});
+
+Task("Build")
+	.IsDependentOn("Restore")
 	.Does(() =>
 	{
 		DotNetCoreBuild(solutionFileName, new DotNetCoreBuildSettings
 		{
+			NoRestore = true,
 			Configuration = configuration,
 			MSBuildSettings = msBuildSettings,
 		});
@@ -70,6 +81,7 @@ Task("Package")
 			DotNetCorePack($"src/{package}/{package}.csproj", new DotNetCorePackSettings
 			{
 				NoBuild = true,
+				NoRestore = true,
 				Configuration = configuration,
 				OutputDirectory = "artifacts",
 				MSBuildSettings = msBuildSettings,
