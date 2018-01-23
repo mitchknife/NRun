@@ -6,8 +6,10 @@ namespace NRun.Core
 {
 	/// <summary>
 	/// This class wraps a job with start/stop semantics, executing the job on the thread pool.
-	/// The main purpose of this class is to make more of the Windows Service pipeline testable and should not need to be used directly from your code directly.
 	/// </summary>
+	/// <remarks>
+	/// The main purpose of this class is to make more of the Windows Service pipeline testable using NetStandard.
+	/// </remarks>
 	public sealed class JobService
 	{
 		public JobService(IJob job, JobServiceSettings settings)
