@@ -1,6 +1,6 @@
-﻿namespace NRun.WindowsService.Install
+﻿namespace NRun.WindowsService
 {
-	public sealed class WindowsServiceInstallerSettings
+	public sealed class WindowsServiceInstallSettings
 	{
 		/// <summary>
 		/// The service name.

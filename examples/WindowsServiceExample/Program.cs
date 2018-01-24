@@ -4,13 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using NRun.Core;
 using NRun.WindowsService;
-using NRun.WindowsService.Install;
 
 namespace WindowsServiceExample
 {
 	class Program
 	{
-		static readonly string ServiceName = "Windows Service Example";
+		static readonly string ServiceName = "WindowsServiceExample";
+		static readonly string DisplayName = "Windows Service Example";
+		static readonly string Description = "An example Windows Service.";
 
 		static void Main(string[] args)
 		{
@@ -24,7 +25,7 @@ namespace WindowsServiceExample
 			if (Environment.UserInteractive)
 				ConsoleApp.Run(jobService);
 			else
-				WindowsService.Run(jobService, new WindowsServiceSettings { ServiceName = ServiceName });
+				WindowsService.Run(new WindowsServiceSettings { JobService = jobService, ServiceName = ServiceName });
 		}
 
 		static async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -48,11 +49,18 @@ namespace WindowsServiceExample
 
 			if (arguments.Length == 1)
 			{
+				var settings = new WindowsServiceInstallSettings
+				{
+					ServiceName = ServiceName,
+					DisplayName = DisplayName,
+					Description = Description,
+				};
+
 				string argument = arguments[0];
 				if (argument == "-install")
-					WindowsServiceInstaller.Install(new WindowsServiceInstallerSettings { ServiceName = ServiceName });
+					WindowsService.Install(settings);
 				else if (argument == "-uninstall")
-					WindowsServiceInstaller.Uninstall(new WindowsServiceInstallerSettings { ServiceName = ServiceName });
+					WindowsService.Uninstall(settings);
 				else
 					Console.WriteLine("Invalid argument: '{0}'", argument);
 			}
