@@ -4,12 +4,6 @@ var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
 
 string solutionFileName = "NRun.sln";
-var packages = new[]
-{
-	"NRun.Core",
-	"NRun.WindowsService",
-};
-
 GitVersion gitVersion = null;
 DotNetCoreMSBuildSettings msBuildSettings = null;
 
@@ -76,17 +70,14 @@ Task("Package")
 	.IsDependentOn("Test")
 	.Does(() =>
 	{
-		foreach (string package in packages)
+		DotNetCorePack(solutionFileName, new DotNetCorePackSettings
 		{
-			DotNetCorePack($"src/{package}/{package}.csproj", new DotNetCorePackSettings
-			{
-				NoBuild = true,
-				NoRestore = true,
-				Configuration = configuration,
-				OutputDirectory = "artifacts",
-				MSBuildSettings = msBuildSettings,
-			});
-		};
+			NoBuild = true,
+			NoRestore = true,
+			Configuration = configuration,
+			OutputDirectory = "artifacts",
+			MSBuildSettings = msBuildSettings,
+		});
 	});
 
 Task("Default")

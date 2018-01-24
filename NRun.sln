@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NRun.Core.UnitTests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NRun.WindowsService", "src\NRun.WindowsService\NRun.WindowsService.csproj", "{FBCC321C-D687-4521-8E2C-9B95413B97CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsServiceExample", "examples\WindowsServiceExample\WindowsServiceExample.csproj", "{B0F0F162-5B58-470F-97A3-6463829861AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsServiceExample", "examples\WindowsServiceExample\WindowsServiceExample.csproj", "{B0F0F162-5B58-470F-97A3-6463829861AE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{239778D7-5083-427B-B4F7-59BA57A79CDE}"
 EndProject
