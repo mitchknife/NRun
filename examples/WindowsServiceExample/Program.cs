@@ -77,27 +77,13 @@ namespace WindowsServiceExample
 	{
 		public static void Run(JobService jobService)
 		{
-			var semaphore = new SemaphoreSlim(0);
-
-			void onServiceFaulted(object sender, Exception exception) => semaphore.Release();
-			jobService.ServiceFaulted += onServiceFaulted;
-
-			try
+			using (var semaphore = new SemaphoreSlim(0))
 			{
+				Console.CancelKeyPress += (sender, args) => semaphore.Release();
+				jobService.ServiceFaulted += (sender, exception) => semaphore.Release();
 				jobService.Start();
-				Task.Run(() =>
-				{
-					Console.WriteLine("Presse any key to stop.");
-					Console.ReadKey();
-					semaphore.Release();
-				});
 				semaphore.Wait();
 				jobService.Stop();
-			}
-			finally
-			{
-				jobService.ServiceFaulted -= onServiceFaulted;
-				semaphore.Dispose();
 			}
 		}
 	}
