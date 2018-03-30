@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using NRun.ConsoleApp;
 using NRun.Core;
 using NRun.WindowsService;
 
@@ -23,7 +24,7 @@ namespace WindowsServiceExample
 			var jobService = new JobService(job);
 
 			if (Environment.UserInteractive)
-				ConsoleApp.Run(jobService);
+				ConsoleApp.Run(new ConsoleAppSettings { JobService = jobService });
 			else
 				WindowsService.Run(new WindowsServiceSettings { JobService = jobService, ServiceName = ServiceName });
 		}
@@ -70,21 +71,6 @@ namespace WindowsServiceExample
 			}
 
 			return true;
-		}
-	}
-
-	internal static class ConsoleApp
-	{
-		public static void Run(JobService jobService)
-		{
-			using (var semaphore = new SemaphoreSlim(0))
-			{
-				Console.CancelKeyPress += (sender, args) => semaphore.Release();
-				jobService.ServiceFaulted += (sender, exception) => semaphore.Release();
-				jobService.Start();
-				semaphore.Wait();
-				jobService.Stop();
-			}
 		}
 	}
 }

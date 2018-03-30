@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.0.0-rc0002" />
+    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.0.0-preview00001" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NRun.Common.Testing\NRun.Common.Testing.csproj" />
+    <ProjectReference Include="..\..\src\NRun.ConsoleApp\NRun.ConsoleApp.csproj" />
+    <ProjectReference Include="..\..\src\NRun.Core\NRun.Core.csproj" />
+  </ItemGroup>
+</Project>
