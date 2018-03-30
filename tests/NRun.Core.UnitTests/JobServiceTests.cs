@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using FluentAssertions;
+using NRun.Common.Testing;
 using Xunit;
 
 namespace NRun.Core.UnitTests

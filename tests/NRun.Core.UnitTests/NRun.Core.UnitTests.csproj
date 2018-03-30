@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\NRun.Common.Testing\NRun.Common.Testing.csproj" />
     <ProjectReference Include="..\..\src\NRun.Core\NRun.Core.csproj" />
   </ItemGroup>
 

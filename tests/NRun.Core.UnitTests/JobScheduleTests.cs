@@ -1,6 +1,7 @@
 ﻿using System;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
+using NRun.Common.Testing;
 using Xunit;
 
 namespace NRun.Core.UnitTests

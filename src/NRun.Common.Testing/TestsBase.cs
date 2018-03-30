@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 
-namespace NRun.Core.UnitTests
+namespace NRun.Common.Testing
 {
 	public abstract class TestsBase
 	{
@@ -39,21 +39,5 @@ namespace NRun.Core.UnitTests
 				stop();
 			};
 		}
-	}
-
-	internal static class TestExtensions
-	{
-		public static void ShouldWait(this SemaphoreSlim semaphore, int count)
-		{
-			int actualCount = 0;
-			while (semaphore.Wait(actualCount == count ? 100 : 1000))
-				actualCount++;
-
-			actualCount.Should().Be(count, "semaphore.Release() should have been called {0} times", count);
-		}
-	}
-
-	internal sealed class TestException : Exception
-	{
 	}
 }

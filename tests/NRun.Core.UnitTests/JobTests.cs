@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
+using NRun.Common.Testing;
 using Xunit;
 
 namespace NRun.Core.UnitTests
