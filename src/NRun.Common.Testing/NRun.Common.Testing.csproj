@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="5.0.0-rc0002" />
+    <PackageReference Include="FluentAssertions" Version="5.3.0" />
   </ItemGroup>
 </Project>
