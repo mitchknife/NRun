@@ -4,7 +4,7 @@
     <TargetFramework>net47</TargetFramework>
     <Product>NRun Framework</Product>
     <PackageId>NRun.WindowsService</PackageId>
-    <Description>Extensions for running IWork as a Windows Service.</Description>
+    <Description>NRun extensions for installing and running a job as a Windows Service.</Description>
     <Authors>Mitch Rosenburg</Authors>
   </PropertyGroup>
 

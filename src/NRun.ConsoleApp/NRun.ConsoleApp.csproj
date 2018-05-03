@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>NRun Framework</Product>
+    <PackageId>NRun.ConsoleApp</PackageId>
+    <Description>NRun extensions for running a job as a console app.</Description>
+    <Authors>Mitch Rosenburg</Authors>
   </PropertyGroup>
 
   <ItemGroup>

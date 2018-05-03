@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <Product>NRun Framework</Product>
     <PackageId>NRun.Core</PackageId>
-    <Description>A framework for working with work.</Description>
+    <Description>A simple framework for scheduling and running jobs.</Description>
     <Authors>Mitch Rosenburg</Authors>
   </PropertyGroup>
 
