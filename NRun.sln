@@ -6,8 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{7B1EF928-A1D6-4BAE-A4CD-1D48A18101FF}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		build.cake = build.cake
-		build.ps1 = build.ps1
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NRun.Core", "src\NRun.Core\NRun.Core.csproj", "{8A57535F-2AFC-4275-877C-9EB1C6DCBFBE}"
