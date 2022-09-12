@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Product>NRun Framework</Product>
     <PackageId>NRun.Core</PackageId>
     <Description>A simple framework for scheduling and running jobs.</Description>
