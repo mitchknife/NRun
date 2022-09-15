@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NRun.ConsoleApp\NRun.ConsoleApp.csproj" />
     <ProjectReference Include="..\..\src\NRun.Core\NRun.Core.csproj" />
     <ProjectReference Include="..\..\src\NRun.WindowsService\NRun.WindowsService.csproj" />
   </ItemGroup>
